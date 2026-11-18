@@ -23,7 +23,7 @@ jobs:
       # The apps' runtime image is Python 3.14.
       python-version: "3.14"
       # Every extra, so every module's tests run.
-      extras: dev azure backup
+      extras: dev azure backup web
       coverage: appkit
       coverage-pr-comment: true
       diff-coverage: "80"

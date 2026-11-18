@@ -2,6 +2,7 @@
 
 Each module was once copied between career, finances and gym-log; a fix now
 lands here once and reaches every app through a version bump. Install with the
-extras a module needs: `appkit[azure]` for `keyvault` and `appkit[backup]` for
-running a backup. `headers`, `passcode` and `selfcheck` need only the core.
+extras a module needs: `appkit[web]` for `headers` and `passcode`,
+`appkit[azure]` for `keyvault` and `appkit[backup]` for running a backup.
+`selfcheck` needs only the core, which has no dependencies.
 """
