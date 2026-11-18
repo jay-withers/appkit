@@ -55,6 +55,18 @@ repos:
       - id: shellcheck
         args: [--external-sources]
 
+  # ruff is both linter and formatter; its config is in pyproject.toml.
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: ef6cf06c079dd6b299dfc720b0f14400c9d168e1 # frozen: v0.17.5
+    hooks:
+      - id: ruff-check
+        args: [--fix]
+
+      # Python only: the upstream hook's types_or includes markdown, and
+      # prose is not ruff's business.
+      - id: ruff-format
+        types_or: [python, pyi]
+
   - repo: https://github.com/hadolint/hadolint
     rev: 2eece55955ced00200be9729e9728cb7dacca505 # frozen: v2.15.1
     hooks:

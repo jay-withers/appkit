@@ -1,0 +1,30 @@
+name: ci-python
+
+# Runs the test suite and mypy on a pull request, through the shared
+# jay-withers/workflows python.yml. Every app pins a release of this library,
+# so a red suite here is a broken app on its next bump.
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+  # For the coverage comment. A called workflow can never hold more than its
+  # caller grants.
+  pull-requests: write
+
+jobs:
+  test:
+    # Not path filtered: a required check skipped by a path filter never
+    # reports, which blocks a pull request rather than passing it.
+    uses: jay-withers/workflows/.github/workflows/python.yml@801fec3f77ffca7b2124bd0aa24be37b60bda7ac # v1.28.4
+    with:
+      working-directory: .
+      # The apps' runtime image is Python 3.14.
+      python-version: "3.14"
+      # Every extra, so every module's tests run.
+      extras: dev azure backup
+      coverage: appkit
+      coverage-pr-comment: true
+      diff-coverage: "80"
+      typecheck: mypy
