@@ -1,129 +1,73 @@
-# template-repo-base
+# appkit
 
-A language-agnostic GitHub repository template. It gives a new repo a working
-baseline on day one — pinned tools (mise), generic pre-commit hooks, PR/merge CI
-workflows, Renovate dependency updates, and Conventional Commits enforcement —
-with no application code, so you add your own source and layer
-project-specific tooling on top.
+Shared building blocks for the jay-withers apps on the shared Container Apps
+environment (career, finances, gym-log). Each module was once copied between
+those apps, and a fix had to be made in every copy. It's now made here once,
+and each app picks it up with a version bump.
 
-## Getting started
+| Module | What it is | Extra |
+| --- | --- | --- |
+| `appkit.headers` | Security headers and the per-response CSP script nonce: `install(app)` | none |
+| `appkit.passcode` | The shared-passcode gate: `PasscodeGate(cookie_name, settings=, secret=)`, with `issue`, `valid`, `check_passcode` and the `require_session` dependency | none |
+| `appkit.keyvault` | Secret resolution (environment, then `.env`, then Key Vault) and the Azure credential | `azure` |
+| `appkit.backup` | The nightly age-encrypted copy of each document to Cloudflare R2, verified by restoring it | `backup` |
+| `appkit.selfcheck` | The post-deploy check loop, plus secret and backup checks | none |
 
-1. Create a repo from this template (**Use this template** on GitHub, or `gh
-   repo create --template`).
-2. Once per machine, set up the tools with
-   [jay-withers/toolchain](https://github.com/jay-withers/toolchain)
-   (`bash src/setup.sh`), which installs [mise](https://mise.jdx.dev).
-3. In the repo, install its pinned tools and the git hooks:
+Each app keeps what is really its own: its `Settings` class, its list of
+documents and secrets, and thin cached wrappers (`secret()`, `credential()`)
+that its tests can clear. appkit reads settings through small protocols
+(`PasscodeSettings`, `BackupSettings`) whose field names match the apps'
+existing settings.
 
-   ```bash
-   mise trust && make install   # make install runs `mise install` first
-   ```
+## Using it
 
-`mise.toml` pins every tool this repo's hooks and CI use. CI installs the same
-versions (jay-withers/workflows v1.26.0+), so add a tool there rather than
-installing it by hand.
+Pin a release tag in the app's `pyproject.toml`, with the extras it needs:
 
-## Commands
+```toml
+dependencies = [
+  "appkit[azure,backup] @ git+https://github.com/jay-withers/appkit@v0.1.0",
+]
+```
 
-Run `make` (or `make help`) to list the available targets:
+The repo is public, so this needs no token. uv fetches a `git+` URL with the
+`git` CLI, so the image builder needs `git`. Where it doesn't have it, use the
+tag archive instead:
+`https://github.com/jay-withers/appkit/archive/refs/tags/v0.1.0.tar.gz`.
+
+```python
+from appkit import headers
+from appkit.passcode import PasscodeGate
+
+from .settings import secret, settings
+
+gate = PasscodeGate("gymlog_session", settings=settings, secret=secret)
+headers.install(app)
+```
+
+## Developing
+
+Once per machine, set up the tools with
+[jay-withers/toolchain](https://github.com/jay-withers/toolchain). Then:
 
 ```bash
-make install           # install mise tools and pre-commit hooks (run once after cloning)
-make lint              # run all pre-commit hooks against every file
+make install     # mise tools, pre-commit hooks, and the venv with every extra
+make test        # pytest
+make typecheck   # mypy over src/ and tests/
+make lint        # every pre-commit hook (ruff included)
 ```
 
-## Pre-commit hooks
+CI (`ci-python`) runs the suite and mypy on Python 3.14, the apps' runtime,
+and gates diff coverage at 80%. `cd-tag` tags a release on every merge to
+`main` from the Conventional Commits since the last one, and Renovate raises
+the pin in each app.
 
-Hooks live in `.pre-commit-config.yaml`, pinned by commit SHA with the tag as a
-frozen comment. They're deliberately language-agnostic:
+## Changing it
 
-- `pre-commit/pre-commit-hooks` — large-file, case-conflict, merge-conflict,
-  symlink, YAML, end-of-file, trailing-whitespace, line-ending and shebang
-  checks, `forbid-new-submodules`, plus `no-commit-to-branch` (blocks direct
-  commits to `main`)
-- `gitleaks` — secret scanning
-- `actionlint` — GitHub Actions workflow linting
-- `shellcheck` — shell scripts
-- `hadolint` — Dockerfiles, through Docker (`hadolint-docker`), so nothing to
-  install; it only runs once the repo has a Dockerfile
-- `commitlint` — [Conventional Commits](https://www.conventionalcommits.org/),
-  at the `commit-msg` stage
+A change here reaches every app on its next bump, so:
 
-As your repo gains a language, add its formatter/linter hooks here — don't
-remove these. Renovate keeps the frozen hook revisions up to date.
-
-## Commit messages
-
-Commits must follow [Conventional Commits](https://www.conventionalcommits.org/),
-enforced by commitlint at commit-msg time. The commit type drives the automatic
-version bump on merge (see below). Examples:
-
-```text
-feat: add health check endpoint
-fix: correct retry backoff
-chore: bump dependency
-```
-
-## CI/CD
-
-Workflows are prefixed `ci-` (pull-request checks) or `cd-` (post-merge delivery):
-
-- **`.github/workflows/ci-lint.yml`** — runs all pre-commit hooks on PRs
-  to `main`, by calling the shared reusable workflow
-  `jay-withers/workflows/.github/workflows/pre-commit.yml`. Its status
-  check reports as `pre-commit / Pre-commit`.
-- **`.github/workflows/ci-codeql.yml`** — CodeQL code scanning of the
-  workflows, on PRs, on `main` and weekly. Findings land in Security → Code
-  scanning; the job doesn't fail on them.
-- **`.github/workflows/cd-tag.yml`** — on every merge to `main`, creates a
-  semver tag and matching GitHub release from the Conventional Commits since the
-  last release (default bump: patch), via
-  `jay-withers/workflows/.github/workflows/release.yml`.
-
-Each pins its reusable workflow by commit SHA with the tag as a comment. Add your
-own `ci-*` workflows (build, test, etc.) as you add code, and require their
-checks in branch protection (below).
-
-## Renovate
-
-`renovate.json` extends the shared preset `github>jay-withers/renovate` (see
-[jay-withers/renovate](https://github.com/jay-withers/renovate) for the
-policy: Monday schedule, auto-merge once checks pass, a three-day wait on new
-releases, and the `pre-commit` and `mise` managers that keep hook revisions
-and `mise.toml` current), plus `autoApprove: true`. Its Docker, GitHub
-Actions, Terraform and npm rules switch on by themselves as the repo gains
-those ecosystems. `platformAutomerge` needs repo-level auto-merge to be
-enabled — see [Configuring GitHub](#configuring-github-for-a-repo-created-from-this-template).
-
-## Configuring GitHub for a repo created from this template
-
-Settings that can't be templated as files — repo-level auto-merge, delete
-branch on merge, and a branch-protection ruleset requiring status checks and
-approving reviews — aren't bootstrapped by anything in this template anymore.
-A repo just created from this template gets GitHub's defaults until it's
-added to `var.repos` in
-[jay-withers/github-repos](https://github.com/jay-withers/github-repos)'
-`terraform/terraform.tfvars` and applied — that Terraform root module is now
-the single source of truth for these settings across every jay-withers repo,
-this template included.
-
-## Structure
-
-```text
-mise.toml              # pinned tool versions, used locally and in CI
-.vscode/
-  extensions.json      # recommended VS Code extensions
-.github/
-  workflows/
-    ci-lint.yml        # lints all files on PRs to main (reusable workflow)
-    ci-codeql.yml      # CodeQL over the workflows
-    cd-tag.yml         # auto-tags + releases on merge to main (semver, conventional commits)
-.editorconfig          # baseline editor settings (aligned with pre-commit hooks)
-.gitattributes         # git-level LF normalization
-.pre-commit-config.yaml
-commitlint.config.js   # commitlint (Conventional Commits) config
-renovate.json          # automated dependency updates
-CLAUDE.md              # guidance for Claude Code
-LICENSE
-Makefile
-```
+- **Keep behaviour compatible**, or make it a `feat!:` and bump every app in
+  the same sweep.
+- **Every fix gets a regression test here.** The apps' own tests keep
+  covering how they use appkit.
+- **Nothing logs a secret's value**, and nothing imports the Azure SDK, boto3
+  or pyrage at module level: an app's pure code and tests must not need them.

@@ -4,12 +4,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo does
 
-A language-agnostic GitHub repository template. It provides pinned tools
-(mise), generic pre-commit hooks, PR/merge CI workflows (linting via a shared reusable
-workflow, and auto-tagging on merge), Renovate dependency updates, Conventional
-Commits enforcement, and Makefile scaffolding. It ships no application code on
-purpose — a repo created from it adds its own source and layers
-project-specific hooks/CI on top of this baseline.
+`appkit`, the Python library behind the jay-withers apps on the shared
+Container Apps environment: security headers (`headers`), the passcode gate
+(`passcode`), secret resolution (`keyvault`), the nightly R2 backup
+(`backup`) and the selfcheck loop (`selfcheck`). README.md has the table and
+how an app pins it. Built on template-repo-base, whose tooling notes follow.
+
+## Rules
+
+- Every app pins a release, so a change ships to all of them on their next
+  bump. Keep behaviour compatible, or use `feat!:` and bump every app in one
+  sweep.
+- A fix gets a regression test here.
+- Never log a secret's value. Import the Azure SDK, boto3 and pyrage inside
+  functions only, never at module level (an app's pure code and tests must
+  not need them).
+- appkit reads an app's settings through the protocols (`PasscodeSettings`,
+  `BackupSettings`), and calls the app's `settings()` and `secret()` on every
+  use rather than capturing them, so a test that clears the app's caches sees
+  the change.
+- `make test` and `make typecheck` run with every extra. CI's `test / Test`
+  is ci-python (Python 3.14, mypy, 80% diff coverage). It becomes a required
+  check once github-repos lists it for appkit; until then, never merge with
+  it red.
 
 ## Tools
 
@@ -24,7 +41,9 @@ is set up once with jay-withers/toolchain. There is no dev container.
 `make` with no target prints the self-documenting help (the default goal).
 
 ```bash
-make install           # install mise tools and pre-commit hooks (run once after cloning)
+make install           # mise tools, pre-commit hooks and the venv with every extra
+make test              # pytest
+make typecheck         # mypy over src/ and tests/
 make lint              # run all pre-commit hooks against every file
 ```
 
