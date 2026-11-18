@@ -12,6 +12,8 @@ dependencies = []
 # not core, so a batch job using only keyvault, backup or selfcheck (repo-agent,
 # market-agent's job) doesn't install a web framework it never imports.
 web = ["fastapi>=0.115"]
+# testing.py: browser tests in an app's tests/e2e/, against a real Chromium.
+e2e = ["pytest-playwright>=0.7"]
 # keyvault.py: secret resolution and the Azure credential.
 azure = [
   "azure-identity>=1.19",
@@ -31,6 +33,8 @@ dev = [
   "httpx2>=0.28",
   # The tests' login route parses a form.
   "python-multipart>=0.0.20",
+  # test_testing.py serves its e2e app with uvicorn, as the apps serve theirs.
+  "uvicorn>=0.34",
   "mypy>=2.4.1",
   "boto3-stubs[s3]>=1.44",
 ]

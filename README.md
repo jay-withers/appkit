@@ -7,11 +7,12 @@ and each app picks it up with a version bump.
 
 | Module | What it is | Extra |
 | --- | --- | --- |
-| `appkit.headers` | Security headers and the per-response CSP script nonce: `install(app)` | none |
-| `appkit.passcode` | The shared-passcode gate: `PasscodeGate(cookie_name, settings=, secret=)`, with `issue`, `valid`, `check_passcode` and the `require_session` dependency | none |
+| `appkit.headers` | Security headers and the per-response CSP script nonce: `install(app)` | `web` |
+| `appkit.passcode` | The shared-passcode gate: `PasscodeGate(cookie_name, settings=, secret=)`, with `issue`, `valid`, `check_passcode` and the `require_session` dependency | `web` |
 | `appkit.keyvault` | Secret resolution (environment, then `.env`, then Key Vault) and the Azure credential | `azure` |
 | `appkit.backup` | The nightly age-encrypted copy of each document to Cloudflare R2, verified by restoring it | `backup` |
 | `appkit.selfcheck` | The post-deploy check loop, plus secret and backup checks | none |
+| `appkit.testing` | Browser tests: `live_server` runs the app on a free port, `log_in` signs in through `/login`, `watch_console` collects console errors (a CSP block is one), and `require_browser` skips without Chromium locally but fails under CI. In the app's dev extra, not its runtime | `e2e` |
 
 Each app keeps what is really its own: its `Settings` class, its list of
 documents and secrets, and thin cached wrappers (`secret()`, `credential()`)

@@ -17,13 +17,15 @@ jobs:
   test:
     # Not path filtered: a required check skipped by a path filter never
     # reports, which blocks a pull request rather than passing it.
-    uses: jay-withers/workflows/.github/workflows/python.yml@801fec3f77ffca7b2124bd0aa24be37b60bda7ac # v1.28.4
+    uses: jay-withers/workflows/.github/workflows/python.yml@a50f010c3052f2d14a9f3a49ed54b9576429dcd6 # v1.29.0
     with:
       working-directory: .
       # The apps' runtime image is Python 3.14.
       python-version: "3.14"
       # Every extra, so every module's tests run.
-      extras: dev azure backup web
+      extras: dev azure backup web e2e
+      # Chromium for test_testing.py's browser tests.
+      playwright: true
       coverage: appkit
       coverage-pr-comment: true
       diff-coverage: "80"

@@ -9,7 +9,7 @@ PROBE = """
 import sys
 sys.modules["fastapi"] = None
 sys.modules["starlette"] = None
-import appkit, appkit.keyvault, appkit.backup, appkit.selfcheck
+import appkit, appkit.keyvault, appkit.backup, appkit.selfcheck, appkit.testing
 """
 
 

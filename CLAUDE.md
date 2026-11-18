@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 `appkit`, the Python library behind the jay-withers apps on the shared
 Container Apps environment: security headers (`headers`), the passcode gate
 (`passcode`), secret resolution (`keyvault`), the nightly R2 backup
-(`backup`) and the selfcheck loop (`selfcheck`). README.md has the table and
+(`backup`), the selfcheck loop (`selfcheck`) and the browser-test helpers
+the apps' `tests/e2e/` use (`testing`). README.md has the table and
 how an app pins it. Built on template-repo-base, whose tooling notes follow.
 
 ## Rules
@@ -23,7 +24,9 @@ how an app pins it. Built on template-repo-base, whose tooling notes follow.
   `BackupSettings`), and calls the app's `settings()` and `secret()` on every
   use rather than capturing them, so a test that clears the app's caches sees
   the change.
-- `make test` and `make typecheck` run with every extra. CI's `test / Test`
+- `make test` and `make typecheck` run with every extra. `test_testing.py`'s
+  browser tests skip without Chromium; `make e2e` installs it first, and CI
+  installs it through ci-python's `playwright: true`. CI's `test / Test`
   is ci-python (Python 3.14, mypy, 80% diff coverage). It becomes a required
   check once github-repos lists it for appkit; until then, never merge with
   it red.
