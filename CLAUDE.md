@@ -5,8 +5,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this repo does
 
 `appkit`, the Python library behind the jay-withers apps on the shared
-Container Apps environment: security headers (`headers`), the passcode gate
-(`passcode`), secret resolution (`keyvault`), the nightly R2 backup
+Container Apps environment: security headers (`headers`), liveness and readiness (`health`), the
+passcode gate (`passcode`), secret resolution (`keyvault`), the nightly R2 backup
 (`backup`), the selfcheck loop (`selfcheck`) and the browser-test helpers
 the apps' `tests/e2e/` use (`testing`). README.md has the table and
 how an app pins it. Built on template-repo-base, whose tooling notes follow.
