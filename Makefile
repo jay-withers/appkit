@@ -15,7 +15,7 @@ install: ## Install mise tools, pre-commit hooks and Python dependencies
 # Every extra, so the suite covers every module. pytest is an extra, not a
 # dependency group, so `uv run` alone would not install it.
 # --locked, as CI runs: fail on a stale uv.lock rather than rewrite it.
-EXTRAS := --locked --extra dev --extra azure --extra backup
+EXTRAS := --locked --extra dev --extra azure --extra backup --extra web
 
 test: ## Run the test suite
 	uv run $(EXTRAS) pytest

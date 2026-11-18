@@ -41,9 +41,6 @@ wheels = [
 name = "appkit"
 version = "0.0.0"
 source = { editable = "." }
-dependencies = [
-    { name = "fastapi" },
-]
 
 [package.optional-dependencies]
 azure = [
@@ -63,6 +60,9 @@ dev = [
     { name = "python-multipart" },
     { name = "ruff" },
 ]
+web = [
+    { name = "fastapi" },
+]
 
 [package.metadata]
 requires-dist = [
@@ -70,7 +70,7 @@ requires-dist = [
     { name = "azure-keyvault-secrets", marker = "extra == 'azure'", specifier = ">=4.9" },
     { name = "boto3", marker = "extra == 'backup'", specifier = ">=1.44" },
     { name = "boto3-stubs", extras = ["s3"], marker = "extra == 'dev'", specifier = ">=1.44" },
-    { name = "fastapi", specifier = ">=0.115" },
+    { name = "fastapi", marker = "extra == 'web'", specifier = ">=0.115" },
     { name = "httpx2", marker = "extra == 'dev'", specifier = ">=0.28" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=2.4.1" },
     { name = "pyrage", marker = "extra == 'backup'", specifier = ">=1.4" },
@@ -79,7 +79,7 @@ requires-dist = [
     { name = "python-multipart", marker = "extra == 'dev'", specifier = ">=0.0.20" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8" },
 ]
-provides-extras = ["azure", "backup", "dev"]
+provides-extras = ["web", "azure", "backup", "dev"]
 
 [[package]]
 name = "ast-serialize"

@@ -25,14 +25,24 @@ Pin a release tag in the app's `pyproject.toml`, with the extras it needs:
 
 ```toml
 dependencies = [
-  "appkit[azure,backup] @ git+https://github.com/jay-withers/appkit@v0.1.0",
+  "appkit[azure,backup,web]",
 ]
+
+[tool.uv.sources]
+appkit = { git = "https://github.com/jay-withers/appkit", tag = "v0.2.0" }
 ```
 
-The repo is public, so this needs no token. uv fetches a `git+` URL with the
-`git` CLI, so the image builder needs `git`. Where it doesn't have it, use the
-tag archive instead:
-`https://github.com/jay-withers/appkit/archive/refs/tags/v0.1.0.tar.gz`.
+Pin it in `[tool.uv.sources]`, not as `appkit @ git+https://...` in
+`dependencies`: Renovate bumps a uv git source's tag (running `uv lock`), but
+skips a PEP 508 direct reference.
+
+Extras: `web` (FastAPI) for `headers` and `passcode`, `azure` for `keyvault`,
+`backup` for running a backup. The core has no dependencies, so a batch job
+that only resolves secrets takes `appkit[azure]` and no web framework.
+
+The repo is public, so this needs no token. uv fetches a git source with the
+`git` CLI, so the image builder needs `git` (dev-containers' python-app-builder
+has it from v0.22.0).
 
 ```python
 from appkit import headers
