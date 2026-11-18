@@ -8,7 +8,7 @@ requires-python = ">=3.12"
 dependencies = []
 
 [project.optional-dependencies]
-# headers.py and passcode.py: FastAPI middleware and dependencies. An extra,
+# headers.py, health.py and passcode.py: FastAPI middleware and dependencies. An extra,
 # not core, so a batch job using only keyvault, backup or selfcheck (repo-agent,
 # market-agent's job) doesn't install a web framework it never imports.
 web = ["fastapi>=0.115"]

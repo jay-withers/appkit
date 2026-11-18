@@ -8,6 +8,7 @@ and each app picks it up with a version bump.
 | Module | What it is | Extra |
 | --- | --- | --- |
 | `appkit.headers` | Security headers and the per-response CSP script nonce: `install(app)` | `web` |
+| `appkit.health` | `/healthz` (from memory, reporting `IMAGE_TAG` as `version`) and `/readyz` (the app's own `ready()`, 503 when it raises): `install(app, environment=, ready=)` | `web` |
 | `appkit.passcode` | The shared-passcode gate: `PasscodeGate(cookie_name, settings=, secret=)`, with `issue`, `valid`, `check_passcode` and the `require_session` dependency | `web` |
 | `appkit.keyvault` | Secret resolution (environment, then `.env`, then Key Vault) and the Azure credential | `azure` |
 | `appkit.backup` | The nightly age-encrypted copy of each document to Cloudflare R2, verified by restoring it | `backup` |
