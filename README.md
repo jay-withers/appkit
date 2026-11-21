@@ -1,7 +1,7 @@
 # appkit
 
 Shared building blocks for the jay-withers apps on the shared Container Apps
-environment (career, finances, gym-log). Each module was once copied between
+environment (career, finances, health). Each module was once copied between
 those apps, and a fix had to be made in every copy. It's now made here once,
 and each app picks it up with a version bump.
 
