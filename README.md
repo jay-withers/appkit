@@ -10,6 +10,7 @@ and each app picks it up with a version bump.
 | `appkit.headers` | Security headers and the per-response CSP script nonce: `install(app)` | `web` |
 | `appkit.health` | `/healthz` (from memory, reporting `IMAGE_TAG` as `version`) and `/readyz` (the app's own `ready()`, 503 when it raises): `install(app, environment=, ready=)` | `web` |
 | `appkit.manifest` | The home-screen install manifest: `build(name=, short_name=, colour=, icons=)`, opening on `/` unless `start_url=` says otherwise, with `id` pinned to `/`; `png_icons(prefix)` names the three Android PNGs | none |
+| `appkit.csrf` | Cross-site request forgery defences: `install(app)` refuses a cross-site POST/PUT/PATCH/DELETE (`Sec-Fetch-Site`, else `Origin` against `Host`); `token(request)` and `valid(request, presented)` are the login form's double-submit `csrf_token` (a `__Host-csrf` cookie); `token_in(html)` reads it back in tests | `web` |
 | `appkit.passcode` | The shared-passcode gate: `PasscodeGate(cookie_name, settings=, secret=)`, with `issue`, `valid`, `check_passcode` and the `require_session` dependency | `web` |
 | `appkit.keyvault` | Secret resolution (environment, then `.env`, then Key Vault) and the Azure credential | `azure` |
 | `appkit.backup` | The nightly age-encrypted copy of each document to Cloudflare R2, verified by restoring it | `backup` |
@@ -40,7 +41,7 @@ Pin it in `[tool.uv.sources]`, not as `appkit @ git+https://...` in
 `dependencies`: Renovate bumps a uv git source's tag (running `uv lock`), but
 skips a PEP 508 direct reference.
 
-Extras: `web` (FastAPI) for `headers` and `passcode`, `azure` for `keyvault`,
+Extras: `web` (FastAPI) for `csrf`, `headers` and `passcode`, `azure` for `keyvault`,
 `backup` for running a backup. The core has no dependencies, so a batch job
 that only resolves secrets takes `appkit[azure]` and no web framework.
 
@@ -49,13 +50,15 @@ The repo is public, so this needs no token. uv fetches a git source with the
 has it from v0.22.0).
 
 ```python
-from appkit import headers
+from appkit import csrf, headers
 from appkit.passcode import PasscodeGate
 
 from .settings import secret, settings
 
 gate = PasscodeGate("gymlog_session", settings=settings, secret=secret)
+csrf.install(app)  # before headers, so a refusal carries the headers too
 headers.install(app)
+templates.env.globals["csrf_token"] = csrf.token
 ```
 
 ## Developing
