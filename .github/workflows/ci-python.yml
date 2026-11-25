@@ -1,7 +1,7 @@
 name: ci-python
 
-# Runs the test suite and mypy on a pull request, through the shared
-# jay-withers/workflows python.yml. Every app pins a release of this library,
+# Runs the test suite, mypy, ruff and both coverage floors on a pull request,
+# through the shared jay-withers/workflows python.yml. Every app pins a release of this library,
 # so a red suite here is a broken app on its next bump.
 on:
   pull_request:
@@ -9,15 +9,12 @@ on:
 
 permissions:
   contents: read
-  # For the coverage comment. A called workflow can never hold more than its
-  # caller grants.
-  pull-requests: write
 
 jobs:
   test:
     # Not path filtered: a required check skipped by a path filter never
     # reports, which blocks a pull request rather than passing it.
-    uses: jay-withers/workflows/.github/workflows/python.yml@f748462468ce1fc5b385413fba07e41afc28c1db # v1.32.2
+    uses: jay-withers/workflows/.github/workflows/python.yml@93bff29fb7e15a3669a1f120ab0c3a2940a413d6 # v1.34.0
     with:
       working-directory: .
       # The apps' runtime image is Python 3.14.
@@ -27,6 +24,12 @@ jobs:
       # Chromium for test_testing.py's browser tests.
       playwright: true
       coverage: appkit
-      coverage-pr-comment: true
-      diff-coverage: "80"
+      # Both floors fail the check: the total, so the library can't slip, and
+      # the lines a PR changes, so new code comes with its tests. The table
+      # is in the job summary; there is no PR comment.
+      coverage-min: "90"
+      diff-coverage: "90"
       typecheck: mypy
+      # ruff check and ruff format --check, from the locked dev extra, so CI
+      # runs the ruff `make lint` does.
+      lint: true
