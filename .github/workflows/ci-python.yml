@@ -17,8 +17,9 @@ jobs:
     uses: jay-withers/workflows/.github/workflows/python.yml@93bff29fb7e15a3669a1f120ab0c3a2940a413d6 # v1.34.0
     with:
       working-directory: .
-      # The apps' runtime image is Python 3.14.
-      python-version: "3.14"
+      # mise.toml's python, which python.yml runs; it must stay the apps'
+      # runtime image's (dev-containers python-app), whose own ci-container-build
+      # checks hold them together.
       # Every extra, so every module's tests run.
       extras: dev azure backup web e2e
       # Chromium for test_testing.py's browser tests.

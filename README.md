@@ -73,8 +73,8 @@ make typecheck   # mypy over src/ and tests/
 make lint        # every pre-commit hook (ruff included)
 ```
 
-CI (`ci-python`) runs the suite, mypy and ruff on Python 3.14, the apps'
-runtime, and fails if total coverage or the lines a PR changes fall under
+CI (`ci-python`) runs the suite, mypy and ruff on `mise.toml`'s Python, which
+must stay the apps' runtime image's (dev-containers `python-app`), and fails if total coverage or the lines a PR changes fall under
 90%. `cd-tag` tags a release on every merge to
 `main` from the Conventional Commits since the last one, and Renovate raises
 the pin in each app.
