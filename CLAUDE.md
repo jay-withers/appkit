@@ -28,7 +28,8 @@ how an app pins it. Built on template-repo-base, whose tooling notes follow.
 - `make test` and `make typecheck` run with every extra. `test_testing.py`'s
   browser tests skip without Chromium; `make e2e` installs it first, and CI
   installs it through ci-python's `playwright: true`. CI's `test / Test`
-  is ci-python (Python 3.14, mypy, 80% diff coverage). It becomes a required
+  is ci-python (Python 3.14, mypy, ruff, and 90% floors on total and
+  diff coverage). It becomes a required
   check once github-repos lists it for appkit; until then, never merge with
   it red.
 
